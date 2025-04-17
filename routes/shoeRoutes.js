@@ -24,7 +24,7 @@ router.post('/', upload.single('image'), async (req, res) => {
       type: req.body.type,
       sizes: req.body.sizes ? req.body.sizes.split(',').map(Number) : [], // Kiểm tra chuỗi sizes
       color: req.body.color,
-      price: parseFloat(req.body.price), // Chuyển price thành số
+      price: parseFloat(req.body.price.replace(/\./g, '')), // Xóa dấu chấm ngăn cách hàng nghìn
       stock: parseInt(req.body.stock, 10), // Chuyển stock thành số nguyên
       image: req.file ? req.file.filename : null, // Kiểm tra file ảnh
     });
