@@ -46,6 +46,35 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch shoes.' });
   }
 });
+router.get('/:id', async (req, res) => {
+  try {
+    const shoe = await Shoe.findById(req.params.id);
+    if (!shoe) {
+      return res.status(404).json({ message: 'Shoe not found.' });
+    }
+    res.json(shoe);
+  } catch (error) {
+    console.error('Error fetching shoe details:', error);
+    res.status(500).json({ message: 'Failed to fetch shoe details.' });
+  }
+});
+router.put('/:id', async (req, res) => {
+  try {
+    const updatedShoe = await Shoe.findByIdAndUpdate(req.params.id, req.body, {
+      new: true, // Trả về document đã cập nhật
+      runValidators: true, // Chạy các validator trong schema
+    });
+
+    if (!updatedShoe) {
+      return res.status(404).json({ message: 'Shoe not found.' });
+    }
+
+    res.json(updatedShoe);
+  } catch (error) {
+    console.error('Error updating shoe:', error);
+    res.status(500).json({ message: 'Failed to update shoe.' });
+  }
+});
 router.delete('/:id', async (req, res) => {
   try {
     const shoeId = req.params.id;
