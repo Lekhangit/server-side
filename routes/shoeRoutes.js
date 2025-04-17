@@ -58,11 +58,44 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch shoe details.' });
   }
 });
-router.put('/:id', async (req, res) => {
+const handleSave = (id, formData) => {
+  setIsUpdating(true);
+  axios
+    .put(`http://localhost:3001/shoes/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data", // Đảm bảo gửi đúng định dạng
+      },
+    })
+    .then((response) => {
+      const updatedShoes = shoeList.map((shoe) =>
+        shoe._id === id ? response.data : shoe
+      );
+      setShoeList(updatedShoes);
+      setEditingId(null);
+      setIsUpdating(false);
+    })
+    .catch((error) => {
+      console.error("Error updating shoe:", error);
+      setIsUpdating(false);
+    });
+};
+router.put('/:id', upload.single('image'), async (req, res) => {
   try {
-    const updatedShoe = await Shoe.findByIdAndUpdate(req.params.id, req.body, {
-      new: true, // Trả về document đã cập nhật
-      runValidators: true, // Chạy các validator trong schema
+    const updatedData = {
+      name: req.body.name,
+      type: req.body.type,
+      sizes: req.body.sizes.split(',').map(Number),
+      color: req.body.color,
+      price: parseFloat(req.body.price),
+      stock: parseInt(req.body.stock, 10),
+    };
+
+    if (req.file) {
+      updatedData.image = req.file.filename; // Cập nhật hình ảnh mới nếu có
+    }
+
+    const updatedShoe = await Shoe.findByIdAndUpdate(req.params.id, updatedData, {
+      new: true,
     });
 
     if (!updatedShoe) {
